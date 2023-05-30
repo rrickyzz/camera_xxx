@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:avatar_glow/avatar_glow.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as dev;
@@ -91,45 +90,42 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
         padding: const EdgeInsets.only(left: 50.0),
         child: Align(
           alignment: Alignment.bottomCenter,
-          child: AvatarGlow(
-            endRadius: _controller.value.isRecordingVideo ? 60 : 0,
-            child: FloatingActionButton(
-              backgroundColor: Colors.green,
-              // Provide an onPressed callback.
-              onPressed: () async {
-                // Take the Picture in a try / catch block. If anything goes wrong,
-                // catch the error.
-                try {
-                  // Ensure that the camera is initialized.
-                  await _initializeControllerFuture;
+          child: FloatingActionButton(
+            backgroundColor: Colors.green,
+            // Provide an onPressed callback.
+            onPressed: () async {
+              // Take the Picture in a try / catch block. If anything goes wrong,
+              // catch the error.
+              try {
+                // Ensure that the camera is initialized.
+                await _initializeControllerFuture;
 
-                  // Attempt to take a picture and get the file `image`
-                  // where it was saved.
-                  // final image = await _controller.takePicture();
-                  await _controller.startVideoRecording();
-                  Future.delayed(const Duration(seconds: 5), () async {
-                    XFile xfile = await _controller.stopVideoRecording();
-                    widget.onSaved(xfile);
-                  });
-                  if (!mounted) return;
+                // Attempt to take a picture and get the file `image`
+                // where it was saved.
+                // final image = await _controller.takePicture();
+                await _controller.startVideoRecording();
+                Future.delayed(const Duration(seconds: 5), () async {
+                  XFile xfile = await _controller.stopVideoRecording();
+                  widget.onSaved(xfile);
+                });
+                if (!mounted) return;
 
-                  // If the picture was taken, display it on a new screen.
-                  // await Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => DisplayPictureScreen(
-                  //       // Pass the automatically generated path to
-                  //       // the DisplayPictureScreen widget.
-                  //       imagePath: image.path,
-                  //     ),
-                  //   ),
-                  // );
-                } catch (e) {
-                  // If an error occurs, log the error to the console.
-                  dev.log(e.toString());
-                }
-              },
-              child: const Icon(Icons.camera_alt),
-            ),
+                // If the picture was taken, display it on a new screen.
+                // await Navigator.of(context).push(
+                //   MaterialPageRoute(
+                //     builder: (context) => DisplayPictureScreen(
+                //       // Pass the automatically generated path to
+                //       // the DisplayPictureScreen widget.
+                //       imagePath: image.path,
+                //     ),
+                //   ),
+                // );
+              } catch (e) {
+                // If an error occurs, log the error to the console.
+                dev.log(e.toString());
+              }
+            },
+            child: const Icon(Icons.camera_alt),
           ),
         ),
       ),
