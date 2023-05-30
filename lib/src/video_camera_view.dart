@@ -131,6 +131,22 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
   }
 }
 
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  final CameraController cameraController = TakeVideoScreenState()._controller;
+
+  // App state changed before we got the chance to initialize.
+  if (!cameraController.value.isInitialized) {
+    return;
+  }
+
+  if (state == AppLifecycleState.inactive) {
+    cameraController.dispose();
+  } else if (state == AppLifecycleState.resumed) {
+    // _initializeCameraController(cameraController.description);
+  }
+}
+
 // A widget that displays the picture taken by the user.
 class DisplayVideoScreen extends StatelessWidget {
   final String imagePath;
