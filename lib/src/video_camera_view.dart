@@ -132,10 +132,10 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
 }
 
 // A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatelessWidget {
+class DisplayVideoScreen extends StatelessWidget {
   final String imagePath;
 
-  const DisplayPictureScreen({super.key, required this.imagePath});
+  const DisplayVideoScreen({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
