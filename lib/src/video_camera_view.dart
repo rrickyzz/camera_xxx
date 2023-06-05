@@ -44,10 +44,16 @@ class TakeVideoScreen extends StatefulWidget {
 class TakeVideoScreenState extends State<TakeVideoScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  int _seconds = 0;
+  int _seconds2 = 5;
+  bool promptVisible = false;
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsFlutterBinding.ensureInitialized();
     // To display the current output from the Camera,
     // create a CameraController.
     _controller = CameraController(
@@ -59,6 +65,44 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
 
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
+  }
+
+  void _startTimer() {
+    const oneSec = Duration(seconds: 1);
+    int duration = 10;
+    int counter = 0;
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (counter < duration) {
+          setState(() {
+            _seconds = counter;
+          });
+          counter++;
+        } else {
+          timer.cancel();
+        }
+      },
+    );
+  }
+
+  void _startTimePrompt() {
+    const oneSec = Duration(seconds: 1);
+    int duration2 = 0;
+    int counter2 = 5;
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer2) {
+        if (counter2 > duration2) {
+          setState(() {
+            _seconds2 = counter2;
+          });
+          counter2--;
+        } else {
+          timer2.cancel();
+        }
+      },
+    );
   }
 
   @override
@@ -74,17 +118,41 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
-          } else {
-            // Otherwise, display a loading indicator.
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+      body: Stack(
+        children: [
+          FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                // If the Future is complete, display the preview.
+                return CameraPreview(_controller);
+              } else {
+                // Otherwise, display a loading indicator.
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Visibility(
+              visible: _controller.value.isRecordingVideo,
+              child: Text(
+                'Recording :00:0$_seconds',
+                style: const TextStyle(color: Colors.green, fontSize: 18),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Visibility(
+              visible: promptVisible,
+              child: Text(
+                'Video recording will in start  $_seconds2 seconds.. ',
+                style: const TextStyle(color: Colors.red, fontSize: 18),
+              ).animate().shake(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(left: 50.0),
@@ -94,6 +162,10 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
             backgroundColor: Colors.green,
             // Provide an onPressed callback.
             onPressed: () async {
+              setState(() {
+                promptVisible = true;
+                _startTimePrompt();
+              });
               // Take the Picture in a try / catch block. If anything goes wrong,
               // catch the error.
               try {
@@ -103,10 +175,25 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
                 // Attempt to take a picture and get the file `image`
                 // where it was saved.
                 // final image = await _controller.takePicture();
-                await _controller.startVideoRecording();
-                Future.delayed(const Duration(seconds: 5), () async {
+                if (_controller.value.isRecordingVideo) {
+                  return;
+                }
+
+                await Future.delayed(const Duration(seconds: 7), () async {
+                  setState(() {
+                    promptVisible = false;
+                    _controller.startVideoRecording();
+                    _startTimer();
+                  });
+                });
+
+                await Future.delayed(const Duration(seconds: 12), () async {
                   XFile xfile = await _controller.stopVideoRecording();
+
                   widget.onSaved(xfile);
+                  Future.delayed(const Duration(seconds: 1), () {
+                    _controller.dispose();
+                  });
                 });
                 if (!mounted) return;
 
