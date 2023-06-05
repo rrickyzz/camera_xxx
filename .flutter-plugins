@@ -4,3 +4,7 @@ camera_android=/Users/rrickyzz/.pub-cache/hosted/pub.dev/camera_android-0.10.8+2
 camera_avfoundation=/Users/rrickyzz/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.13+2/
 camera_web=/Users/rrickyzz/.pub-cache/hosted/pub.dev/camera_web-0.3.1+4/
 flutter_plugin_android_lifecycle=/Users/rrickyzz/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.15/
+video_player=/Users/rrickyzz/.pub-cache/hosted/pub.dev/video_player-2.6.1/
+video_player_android=/Users/rrickyzz/.pub-cache/hosted/pub.dev/video_player_android-2.4.8/
+video_player_avfoundation=/Users/rrickyzz/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.4.6/
+video_player_web=/Users/rrickyzz/.pub-cache/hosted/pub.dev/video_player_web-2.0.16/
