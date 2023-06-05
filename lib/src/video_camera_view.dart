@@ -125,6 +125,9 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 // If the Future is complete, display the preview.
+                if (!_controller.value.isInitialized) {
+                  return Container();
+                }
                 return CameraPreview(_controller);
               } else {
                 // Otherwise, display a loading indicator.
