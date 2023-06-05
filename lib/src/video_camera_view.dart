@@ -191,9 +191,6 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
                   XFile xfile = await _controller.stopVideoRecording();
 
                   widget.onSaved(xfile);
-                  Future.delayed(const Duration(seconds: 1), () {
-                    _controller.dispose();
-                  });
                 });
                 if (!mounted) return;
 
