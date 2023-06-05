@@ -108,7 +108,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
   @override
   void dispose() {
     // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
+    // _controller.dispose();
     super.dispose();
   }
 
@@ -191,6 +191,9 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
                   XFile xfile = await _controller.stopVideoRecording();
 
                   widget.onSaved(xfile);
+                  Future.delayed(const Duration(seconds: 1), () {
+                    _controller.dispose();
+                  });
                 });
                 if (!mounted) return;
 
