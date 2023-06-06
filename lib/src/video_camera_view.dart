@@ -113,7 +113,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
     final CameraController cameraController = _controller;
 
     // App state changed before we got the chance to initialize.
-    if (!cameraController.value.isInitialized) {
+    if (!cameraController.value.isInitialized || cameraController == null) {
       return;
     }
     if (state == AppLifecycleState.detached) {
@@ -123,6 +123,17 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
+      if (cameraController != null) {
+        // If the controller is updated then update the UI.
+        cameraController.addListener(() {
+          if (mounted) setState(() {});
+          if (cameraController.value.hasError) {
+            print('Camera error ${cameraController.value.errorDescription}');
+          }
+        });
+
+        cameraController.initialize();
+      }
       //_initializeCameraController(cameraController.description);
     }
   }
@@ -133,6 +144,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
 
     _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
+
     super.dispose();
   }
 
@@ -219,6 +231,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
 
                   widget.onSaved(xfile);
                 });
+                _controller.dispose();
                 if (!mounted) return;
 
                 // If the picture was taken, display it on a new screen.
