@@ -228,10 +228,10 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
 
                 await Future.delayed(const Duration(seconds: 12), () async {
                   XFile xfile = await _controller.stopVideoRecording();
+                  await _controller.pausePreview();
 
                   widget.onSaved(xfile);
                 });
-                _controller.dispose();
                 if (!mounted) return;
 
                 // If the picture was taken, display it on a new screen.
