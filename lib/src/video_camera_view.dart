@@ -127,8 +127,8 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
   @override
   void dispose() {
     // Dispose of the controller when the widget is disposed.
-    // _controller.dispose();
 
+    _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
