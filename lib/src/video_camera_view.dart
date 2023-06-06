@@ -116,6 +116,9 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
     if (!cameraController.value.isInitialized) {
       return;
     }
+    if (state == AppLifecycleState.detached) {
+      cameraController.dispose();
+    }
 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
