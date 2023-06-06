@@ -41,7 +41,8 @@ class TakeVideoScreen extends StatefulWidget {
   TakeVideoScreenState createState() => TakeVideoScreenState();
 }
 
-class TakeVideoScreenState extends State<TakeVideoScreen> {
+class TakeVideoScreenState extends State<TakeVideoScreen>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   int _seconds = 0;
@@ -52,6 +53,8 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
 
     WidgetsFlutterBinding.ensureInitialized();
     // To display the current output from the Camera,
@@ -106,9 +109,27 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController cameraController = _controller;
+
+    // App state changed before we got the chance to initialize.
+    if (!cameraController.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      //_initializeCameraController(cameraController.description);
+    }
+  }
+
+  @override
   void dispose() {
     // Dispose of the controller when the widget is disposed.
     // _controller.dispose();
+
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -220,22 +241,6 @@ class TakeVideoScreenState extends State<TakeVideoScreen> {
         ),
       ),
     );
-  }
-}
-
-@override
-void didChangeAppLifecycleState(AppLifecycleState state) {
-  final CameraController cameraController = TakeVideoScreenState()._controller;
-
-  // App state changed before we got the chance to initialize.
-  if (!cameraController.value.isInitialized) {
-    return;
-  }
-
-  if (state == AppLifecycleState.inactive) {
-    cameraController.dispose();
-  } else if (state == AppLifecycleState.resumed) {
-    // _initializeCameraController(cameraController.description);
   }
 }
 
