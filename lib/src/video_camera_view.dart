@@ -32,10 +32,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 // A screen that allows users to take a picture using a given camera.
 class TakeVideoScreen extends StatefulWidget {
   const TakeVideoScreen(
-      {super.key, required this.camera, required this.onSaved});
+      {super.key,
+      required this.camera,
+      required this.onSaved,
+      required this.cameraControllerX});
 
   final CameraDescription camera;
   final Function(XFile file) onSaved;
+  final CameraController cameraControllerX;
 
   @override
   TakeVideoScreenState createState() => TakeVideoScreenState();
@@ -43,7 +47,6 @@ class TakeVideoScreen extends StatefulWidget {
 
 class TakeVideoScreenState extends State<TakeVideoScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   int _seconds = 0;
   int _seconds2 = 5;
@@ -59,15 +62,9 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
     WidgetsFlutterBinding.ensureInitialized();
     // To display the current output from the Camera,
     // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.medium,
-    );
 
     // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
+    _initializeControllerFuture = widget.cameraControllerX.initialize();
   }
 
   void _startTimer() {
@@ -110,7 +107,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController cameraController = _controller;
+    final CameraController cameraController = widget.cameraControllerX;
 
     // App state changed before we got the chance to initialize.
     if (!cameraController.value.isInitialized || cameraController == null) {
@@ -142,7 +139,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
   void dispose() {
     // Dispose of the controller when the widget is disposed.
 
-    _controller.dispose();
+    widget.cameraControllerX.dispose();
     WidgetsBinding.instance.removeObserver(this);
 
     super.dispose();
@@ -161,10 +158,10 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 // If the Future is complete, display the preview.
-                if (!_controller.value.isInitialized) {
+                if (!widget.cameraControllerX.value.isInitialized) {
                   return Container();
                 }
-                return CameraPreview(_controller);
+                return CameraPreview(widget.cameraControllerX);
               } else {
                 // Otherwise, display a loading indicator.
                 return const Center(child: CircularProgressIndicator());
@@ -174,7 +171,7 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
           Align(
             alignment: Alignment.topCenter,
             child: Visibility(
-              visible: _controller.value.isRecordingVideo,
+              visible: widget.cameraControllerX.value.isRecordingVideo,
               child: Text(
                 'Recording :00:0$_seconds',
                 style: const TextStyle(color: Colors.green, fontSize: 18),
@@ -207,46 +204,31 @@ class TakeVideoScreenState extends State<TakeVideoScreen>
               });
               // Take the Picture in a try / catch block. If anything goes wrong,
               // catch the error.
-              try {
-                // Ensure that the camera is initialized.
-                await _initializeControllerFuture;
 
-                // Attempt to take a picture and get the file `image`
-                // where it was saved.
-                // final image = await _controller.takePicture();
-                if (_controller.value.isRecordingVideo) {
-                  return;
-                }
+              if (widget.cameraControllerX.value.isRecordingVideo) {
+                try {
+                  // Ensure that the camera is initialized.
+                  await _initializeControllerFuture;
 
-                await Future.delayed(const Duration(seconds: 7), () async {
-                  setState(() {
-                    promptVisible = false;
-                    _controller.startVideoRecording();
-                    _startTimer();
+                  await Future.delayed(const Duration(seconds: 7), () async {
+                    setState(() {
+                      promptVisible = false;
+                      widget.cameraControllerX.startVideoRecording();
+                      _startTimer();
+                    });
                   });
-                });
 
-                await Future.delayed(const Duration(seconds: 12), () async {
-                  XFile xfile = await _controller.stopVideoRecording();
-                  await _controller.pausePreview();
+                  await Future.delayed(const Duration(seconds: 12), () async {
+                    XFile xfile =
+                        await widget.cameraControllerX.stopVideoRecording();
 
-                  widget.onSaved(xfile);
-                });
-                if (!mounted) return;
-
-                // If the picture was taken, display it on a new screen.
-                // await Navigator.of(context).push(
-                //   MaterialPageRoute(
-                //     builder: (context) => DisplayPictureScreen(
-                //       // Pass the automatically generated path to
-                //       // the DisplayPictureScreen widget.
-                //       imagePath: image.path,
-                //     ),
-                //   ),
-                // );
-              } catch (e) {
-                // If an error occurs, log the error to the console.
-                dev.log(e.toString());
+                    widget.onSaved(xfile);
+                  });
+                  if (!mounted) return;
+                } catch (e) {
+                  // If an error occurs, log the error to the console.
+                  dev.log(e.toString());
+                }
               }
             },
             child: const Icon(Icons.camera_alt),
